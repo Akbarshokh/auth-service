@@ -58,16 +58,16 @@ const docTemplate = `{
                 }
             }
         },
-        "/sign": {
+        "/sign-up": {
             "post": {
-                "description": "API for Sign In",
+                "description": "API for Sign Up",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Product Service"
                 ],
-                "summary": "Sign In",
+                "summary": "Sign Up",
                 "parameters": [
                     {
                         "description": "Client ID",
@@ -75,7 +75,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.User"
+                            "$ref": "#/definitions/models.SignInReq"
                         }
                     }
                 ],
@@ -83,7 +83,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/rest.Response"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.SignInRes"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -103,6 +115,46 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.SignInReq": {
+            "type": "object",
+            "properties": {
+                "client_id": {
+                    "type": "string"
+                },
+                "device_num": {
+                    "type": "string"
+                },
+                "device_type": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SignInRes": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "active": {
+                    "type": "boolean"
+                },
+                "client_id": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
         "rest.Response": {
             "type": "object",
             "properties": {

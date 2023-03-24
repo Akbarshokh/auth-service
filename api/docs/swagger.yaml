@@ -1,4 +1,30 @@
 definitions:
+  models.SignInReq:
+    properties:
+      client_id:
+        type: string
+      device_num:
+        type: string
+      device_type:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+    type: object
+  models.SignInRes:
+    properties:
+      access_token:
+        type: string
+      active:
+        type: boolean
+      client_id:
+        type: string
+      refresh_token:
+        type: string
+    type: object
   rest.Response:
     properties:
       data: {}
@@ -59,23 +85,28 @@ paths:
       summary: Checking token with Access Token
       tags:
       - Product Service
-  /sign:
+  /sign-up:
     post:
-      description: API for Sign In
+      description: API for Sign Up
       parameters:
       - description: Client ID
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/user.User'
+          $ref: '#/definitions/models.SignInReq'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/rest.Response'
+            allOf:
+            - $ref: '#/definitions/rest.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.SignInRes'
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -84,7 +115,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/rest.Response'
-      summary: Sign In
+      summary: Sign Up
       tags:
       - Product Service
 swagger: "2.0"

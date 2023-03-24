@@ -12,8 +12,8 @@ type SignInReq struct{
 }
 
 type SignInRes struct{
-	AccessToken string `json:"access_toke"`
-	RefreshToken string `json:"refresh_toke"`
+	AccessToken string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 	Active bool `json:"active"`
 	ClientID string `json:"client_id"`
 }

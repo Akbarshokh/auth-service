@@ -49,7 +49,7 @@ func main() {
 
 	router := gin.Default()
 
-	router.POST("/sign", rest.SignIn(db))
+	router.POST("/sign-up", rest.SignUp(db))
 	router.POST("/check-token", rest.CheckToken(db))
 	router.POST("/get-token", rest.GetToken(db))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
