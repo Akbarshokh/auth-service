@@ -17,11 +17,11 @@ import (
 )
 
 const (
-	host     = PRIVATE
-	port     = PRIVATE
-	user     = PRIVATE
-	password = PRIVATE
-	dbname   = PRIVATE
+	host     = "localhost"
+	port     = 5432
+	user     = "dbsql"
+	password = "gosql"
+	dbname   = "jwt_go"
 )
 
 func main() {

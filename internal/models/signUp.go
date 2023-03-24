@@ -1,6 +1,7 @@
 package models
 
 type SignUpReq struct {
+	
 }
 
 type SignUpRes struct {
