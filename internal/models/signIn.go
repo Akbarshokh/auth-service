@@ -1,7 +1,6 @@
 package models
 
-
-type SignInReq struct{
+type SignInReq struct {
 	ClientID   string `json:"client_id"`
 	FirstName  string `json:"first_name"`
 	LastName   string `json:"last_name"`
@@ -11,9 +10,9 @@ type SignInReq struct{
 	Active     bool   `json:"-"`
 }
 
-type SignInRes struct{
-	AccessToken string `json:"access_token"`
+type SignInRes struct {
+	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
-	Active bool `json:"active"`
-	ClientID string `json:"client_id"`
+	Active       bool   `json:"active"`
+	ClientID     string `json:"client_id"`
 }

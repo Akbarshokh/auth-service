@@ -1,4 +1,30 @@
 definitions:
+  models.CheckTokenReq:
+    properties:
+      access_token:
+        type: string
+    type: object
+  models.CheckTokenRes:
+    properties:
+      active:
+        type: boolean
+    type: object
+  models.GetTokenReq:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  models.GetTokenRes:
+    properties:
+      access_token:
+        type: string
+      active:
+        type: boolean
+      client_id:
+        type: string
+      refresh_token:
+        type: string
+    type: object
   models.SignInReq:
     properties:
       client_id:
@@ -35,25 +61,6 @@ definitions:
       status:
         type: string
     type: object
-  user.User:
-    properties:
-      access_token:
-        type: string
-      client_id:
-        type: string
-      device_num:
-        type: string
-      device_type:
-        type: string
-      email:
-        type: string
-      first_name:
-        type: string
-      last_name:
-        type: string
-      refresh_token:
-        type: string
-    type: object
 info:
   contact: {}
 paths:
@@ -61,19 +68,24 @@ paths:
     post:
       description: This endpoint verifies token is active or not
       parameters:
-      - description: Client ID
+      - description: Access Token
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/user.User'
+          $ref: '#/definitions/models.CheckTokenReq'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/rest.Response'
+            allOf:
+            - $ref: '#/definitions/rest.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.CheckTokenRes'
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -84,7 +96,41 @@ paths:
             $ref: '#/definitions/rest.Response'
       summary: Checking token with Access Token
       tags:
-      - Product Service
+      - User Auth Service
+  /get-token:
+    post:
+      description: This endpoint verifies token is active or not and generates new
+        access token
+      parameters:
+      - description: Access Token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.GetTokenReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/rest.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.GetTokenRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rest.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest.Response'
+      summary: Checking token with Refresh Token
+      tags:
+      - User Auth Service
   /sign-up:
     post:
       description: API for Sign Up
@@ -117,5 +163,5 @@ paths:
             $ref: '#/definitions/rest.Response'
       summary: Sign Up
       tags:
-      - Product Service
+      - User Auth Service
 swagger: "2.0"

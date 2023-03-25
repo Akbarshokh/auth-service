@@ -22,17 +22,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Product Service"
+                    "User Auth Service"
                 ],
                 "summary": "Checking token with Access Token",
                 "parameters": [
                     {
-                        "description": "Client ID",
+                        "description": "Access Token",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.User"
+                            "$ref": "#/definitions/models.CheckTokenReq"
                         }
                     }
                 ],
@@ -40,7 +40,74 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.CheckTokenRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
                             "$ref": "#/definitions/rest.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/get-token": {
+            "post": {
+                "description": "This endpoint verifies token is active or not and generates new access token",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Auth Service"
+                ],
+                "summary": "Checking token with Refresh Token",
+                "parameters": [
+                    {
+                        "description": "Access Token",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.GetTokenReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/rest.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/models.GetTokenRes"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -65,7 +132,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Product Service"
+                    "User Auth Service"
                 ],
                 "summary": "Sign Up",
                 "parameters": [
@@ -115,6 +182,47 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.CheckTokenReq": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.CheckTokenRes": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.GetTokenReq": {
+            "type": "object",
+            "properties": {
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.GetTokenRes": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "active": {
+                    "type": "boolean"
+                },
+                "client_id": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
         "models.SignInReq": {
             "type": "object",
             "properties": {
@@ -166,35 +274,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "string"
-                }
-            }
-        },
-        "user.User": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "client_id": {
-                    "type": "string"
-                },
-                "device_num": {
-                    "type": "string"
-                },
-                "device_type": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "first_name": {
-                    "type": "string"
-                },
-                "last_name": {
-                    "type": "string"
-                },
-                "refresh_token": {
                     "type": "string"
                 }
             }

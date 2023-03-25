@@ -13,15 +13,15 @@ import (
 // @Router /check-token [POST]
 // @Summary Checking token with Access Token
 // @Description This endpoint verifies token is active or not
-// @Tags Product Service
+// @Tags User Auth Service
 // @Produce json
-// @Param request body user.User true "Client ID"
-// @Success 201 {object} Response{data}
+// @Param request body models.CheckTokenReq true "Access Token"
+// @Success 201 {object} Response{data=models.CheckTokenRes}
 // @Failure 400 {object} Response{data}
 // @Failure 500 {object} Response{data}
 func CheckToken(db *sql.DB) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var token models.SignInRes
+		var token models.CheckTokenReq
 		//Parse request body
 		if err := ctx.ShouldBindJSON(&token); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

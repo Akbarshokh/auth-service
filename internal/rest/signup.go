@@ -22,7 +22,7 @@ type Response struct {
 // @Router /sign-up [POST]
 // @Summary Sign Up
 // @Description API for Sign Up
-// @Tags Product Service
+// @Tags User Auth Service
 // @Produce json
 // @Param request body models.SignInReq true "Client ID"
 // @Success 201 {object} Response{data=models.SignInRes}
