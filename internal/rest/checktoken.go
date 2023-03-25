@@ -2,7 +2,7 @@ package rest
 
 import (
 	"database/sql"
-	"jwt-go/internal/models/user"
+	"jwt-go/internal/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +21,7 @@ import (
 // @Failure 500 {object} Response{data}
 func CheckToken(db *sql.DB) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var token user.User
+		var token models.SignInRes
 		//Parse request body
 		if err := ctx.ShouldBindJSON(&token); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
