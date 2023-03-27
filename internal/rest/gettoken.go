@@ -58,7 +58,7 @@ func GetToken(db *sql.DB) gin.HandlerFunc {
 		}
 
 		result := models.GetTokenRes{
-			SignInRes: models.SignInRes{
+			SignUpRes: models.SignUpRes{
 				ClientID: "client_id",
 				AccessToken: access_token_str,
 				RefreshToken: token.RefreshToken,

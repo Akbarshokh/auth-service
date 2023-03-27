@@ -13,5 +13,5 @@ type GetTokenReq struct {
 }
 
 type GetTokenRes struct {
-	SignInRes
+	SignUpRes
 }

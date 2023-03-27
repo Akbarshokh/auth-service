@@ -24,20 +24,20 @@ type Response struct {
 // @Description API for Sign Up
 // @Tags User Auth Service
 // @Produce json
-// @Param request body models.SignInReq true "Client ID"
+// @Param request body models.SignUpReq true "Client ID"
 // @Success 201 {object} Response{data=models.SignInRes}
 // @Failure 400 {object} Response{data}
 // @Failure 500 {object} Response{data}
 func SignUp(db *sql.DB) gin.HandlerFunc{
 	return func(ctx *gin.Context) {
 		//Parse request body
-		var signInReq models.SignInReq
-		if err := ctx.ShouldBindJSON(&signInReq); err != nil{
+		var signUpReq models.SignUpReq
+		if err := ctx.ShouldBindJSON(&signUpReq); err != nil{
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 		//Verify user
-		isUnique, err := isUserUnique(db, signInReq.Email, signInReq.ClientID)
+		isUnique, err := isUserUnique(db, signUpReq.Email, signUpReq.ClientID)
         if err != nil {
             ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
             return
@@ -48,27 +48,27 @@ func SignUp(db *sql.DB) gin.HandlerFunc{
         }
 
 		//Generate 	access and refresh token
-		access_token_str, refresh_token_str, err := generateTokens(signInReq.ClientID)
+		access_token_str, refresh_token_str, err := generateTokens(signUpReq.ClientID)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error})
 			return
 		}
 
 		//Insert into db
-		err = insertUser(db, signInReq, access_token_str, refresh_token_str)
+		err = insertUser(db, signUpReq, access_token_str, refresh_token_str)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error":err.Error})
 			return
 		}
 
 		//Return token to user
-		signInRes := models.SignInRes{
+		signUpRes := models.SignUpRes{
 			AccessToken : access_token_str,
 			RefreshToken : refresh_token_str,
 			Active : true,
-			ClientID: signInReq.ClientID,
+			ClientID: signUpReq.ClientID,
 		}
-		ctx.JSON(http.StatusOK, signInRes)
+		ctx.JSON(http.StatusOK, signUpRes)
 	}
 }
 
@@ -98,9 +98,9 @@ func generateTokens(ClientID string) (string, string, error) {
 	return access_token_str, refresh_token_str, nil
 }
 
-func insertUser(db *sql.DB, signInReq models.SignInReq, accessToken string, refreshToken string) error {
+func insertUser(db *sql.DB, signUpReq models.SignUpReq, accessToken string, refreshToken string) error {
 	query := "INSERT INTO users (client_id, first_name, last_name, email, device_num, device_type, access_token, refresh_token, active) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
-	_, err := db.Exec(query, signInReq.ClientID, signInReq.FirstName, signInReq.LastName, signInReq.Email, signInReq.DeviceNum, signInReq.DeviceType, accessToken, refreshToken, true)
+	_, err := db.Exec(query, signUpReq.ClientID, signUpReq.FirstName, signUpReq.LastName, signUpReq.Email, signUpReq.DeviceNum, signUpReq.DeviceType, accessToken, refreshToken, true)
 	if err != nil {
 		return err
 	}

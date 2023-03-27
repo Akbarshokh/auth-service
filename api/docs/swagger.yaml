@@ -25,7 +25,9 @@ definitions:
       refresh_token:
         type: string
     type: object
-  models.SignInReq:
+  models.SignInRes:
+    type: object
+  models.SignUpReq:
     properties:
       client_id:
         type: string
@@ -38,17 +40,6 @@ definitions:
       first_name:
         type: string
       last_name:
-        type: string
-    type: object
-  models.SignInRes:
-    properties:
-      access_token:
-        type: string
-      active:
-        type: boolean
-      client_id:
-        type: string
-      refresh_token:
         type: string
     type: object
   rest.Response:
@@ -140,7 +131,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/models.SignInReq'
+          $ref: '#/definitions/models.SignUpReq'
       produces:
       - application/json
       responses:

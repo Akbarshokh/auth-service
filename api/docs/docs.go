@@ -142,7 +142,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.SignInReq"
+                            "$ref": "#/definitions/models.SignUpReq"
                         }
                     }
                 ],
@@ -223,7 +223,10 @@ const docTemplate = `{
                 }
             }
         },
-        "models.SignInReq": {
+        "models.SignInRes": {
+            "type": "object"
+        },
+        "models.SignUpReq": {
             "type": "object",
             "properties": {
                 "client_id": {
@@ -242,23 +245,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "last_name": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.SignInRes": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "active": {
-                    "type": "boolean"
-                },
-                "client_id": {
-                    "type": "string"
-                },
-                "refresh_token": {
                     "type": "string"
                 }
             }

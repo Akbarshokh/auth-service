@@ -35,6 +35,9 @@ func CheckToken(db *sql.DB) gin.HandlerFunc {
 			ctx.JSON(http.StatusOK, gin.H{"active": false})
 			return
 		}
-		ctx.JSON(http.StatusOK, gin.H{"active": true})
+		result := models.CheckTokenRes{
+			Active: true,
+		}
+		ctx.JSON(http.StatusOK, result)
 	}
 }
