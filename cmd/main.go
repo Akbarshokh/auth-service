@@ -9,11 +9,12 @@ import (
 	_ "github.com/lib/pq"
 
 	"jwt-go/internal/rest"
+	"jwt-go/internal/cors"
 	"jwt-go/api/docs"
 	// "jwt-go/internal/models"
 	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
-	// swagger embed files
+	ginSwagger "github.com/swaggo/gin-swagger"
+
 )
 
 const (
@@ -28,7 +29,7 @@ func main() {
 	docs.SwaggerInfo.Host = "localhost:8080"
 	docs.SwaggerInfo.BasePath = ""
 	docs.SwaggerInfo.Schemes = []string{"http"}
-	//Connect to db
+	//Connecting to db
 	psql := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
@@ -49,7 +50,10 @@ func main() {
 
 	router := gin.Default()
 
+	router.Use(cors.CORSMiddleware())
+
 	router.POST("/sign-up", rest.SignUp(db))
+	router.POST("/sign-in", rest.SignIn(db))
 	router.POST("/check-token", rest.CheckToken(db))
 	router.POST("/get-token", rest.GetToken(db))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

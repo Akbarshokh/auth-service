@@ -25,7 +25,14 @@ definitions:
       refresh_token:
         type: string
     type: object
-  models.SignInRes:
+  models.SignInReq:
+    properties:
+      access_token:
+        type: string
+      client_id:
+        type: string
+      email:
+        type: string
     type: object
   models.SignUpReq:
     properties:
@@ -40,6 +47,17 @@ definitions:
       first_name:
         type: string
       last_name:
+        type: string
+    type: object
+  models.SignUpRes:
+    properties:
+      access_token:
+        type: string
+      active:
+        type: boolean
+      client_id:
+        type: string
+      refresh_token:
         type: string
     type: object
   rest.Response:
@@ -122,6 +140,34 @@ paths:
       summary: Checking token with Refresh Token
       tags:
       - User Auth Service
+  /sign-in:
+    post:
+      description: API for Sign In
+      parameters:
+      - description: Client ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.SignInReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/rest.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rest.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest.Response'
+      summary: Sign In using client_id, email, and access_token
+      tags:
+      - User Auth Service
   /sign-up:
     post:
       description: API for Sign Up
@@ -142,7 +188,7 @@ paths:
             - $ref: '#/definitions/rest.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/models.SignInRes'
+                  $ref: '#/definitions/models.SignUpRes'
               type: object
         "400":
           description: Bad Request

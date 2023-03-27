@@ -125,6 +125,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/sign-in": {
+            "post": {
+                "description": "API for Sign In",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User Auth Service"
+                ],
+                "summary": "Sign In using client_id, email, and access_token",
+                "parameters": [
+                    {
+                        "description": "Client ID",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SignInReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/rest.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/rest.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/sign-up": {
             "post": {
                 "description": "API for Sign Up",
@@ -158,7 +201,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/models.SignInRes"
+                                            "$ref": "#/definitions/models.SignUpRes"
                                         }
                                     }
                                 }
@@ -223,8 +266,19 @@ const docTemplate = `{
                 }
             }
         },
-        "models.SignInRes": {
-            "type": "object"
+        "models.SignInReq": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "client_id": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                }
+            }
         },
         "models.SignUpReq": {
             "type": "object",
@@ -245,6 +299,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "last_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SignUpRes": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "active": {
+                    "type": "boolean"
+                },
+                "client_id": {
+                    "type": "string"
+                },
+                "refresh_token": {
                     "type": "string"
                 }
             }

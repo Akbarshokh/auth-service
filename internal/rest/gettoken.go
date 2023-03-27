@@ -23,11 +23,12 @@ import (
 func GetToken(db *sql.DB) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var token models.GetTokenReq
+		//Parsing request body
 		if err := ctx.ShouldBindJSON(&token); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		//Verify Refresh Token
+		//Verifying Refresh Token
 		_, err := jwt.Parse(token.RefreshToken, func(t *jwt.Token) (interface{}, error) {
 			return []byte("secret"), nil
 		})
@@ -36,7 +37,7 @@ func GetToken(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 		var response models.GetTokenRes
-		//Generate new Access Token
+		//Generating new Access Token
 		access_token_expiration := time.Now().Add(time.Hour * 24 * 7)
 
 		access_claims := jwt.MapClaims{
@@ -49,7 +50,7 @@ func GetToken(db *sql.DB) gin.HandlerFunc {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "invalid refresh token"})
 			return
 		}
-		//Update tokens in db
+		//Updating tokens in db
 		query := "UPDATE users SET access_token=$1 WHERE refresh_token=$2"
 		_, err = db.Exec(query, access_token_str, token.RefreshToken)
 		if err != nil {
@@ -65,7 +66,7 @@ func GetToken(db *sql.DB) gin.HandlerFunc {
 				Active: true,
 			},
 		}
-		// Return Tokens
+		// Returning Tokens
 		ctx.JSON(http.StatusOK, result)
 	}
 }

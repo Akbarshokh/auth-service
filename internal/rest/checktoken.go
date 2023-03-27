@@ -22,12 +22,12 @@ import (
 func CheckToken(db *sql.DB) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var token models.CheckTokenReq
-		//Parse request body
+		//Parsing request body
 		if err := ctx.ShouldBindJSON(&token); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		//Verify Acces Token
+		//Verifying Acces Token
 		_, err := jwt.Parse(token.AccessToken, func(token *jwt.Token) (interface{}, error) {
 			return []byte("secret"), nil
 		})

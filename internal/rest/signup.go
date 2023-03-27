@@ -25,19 +25,19 @@ type Response struct {
 // @Tags User Auth Service
 // @Produce json
 // @Param request body models.SignUpReq true "Client ID"
-// @Success 201 {object} Response{data=models.SignInRes}
+// @Success 201 {object} Response{data=models.SignUpRes}
 // @Failure 400 {object} Response{data}
 // @Failure 500 {object} Response{data}
 func SignUp(db *sql.DB) gin.HandlerFunc{
 	return func(ctx *gin.Context) {
-		//Parse request body
+		//Parsing request body
 		var signUpReq models.SignUpReq
 		if err := ctx.ShouldBindJSON(&signUpReq); err != nil{
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		//Verify user
-		isUnique, err := isUserUnique(db, signUpReq.Email, signUpReq.ClientID)
+		//Verifying user
+		isUnique, err := IsUserUnique(db, signUpReq.Email, signUpReq.ClientID)
         if err != nil {
             ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
             return
@@ -47,21 +47,21 @@ func SignUp(db *sql.DB) gin.HandlerFunc{
             return
         }
 
-		//Generate 	access and refresh token
+		//Generating 	access and refresh token
 		access_token_str, refresh_token_str, err := generateTokens(signUpReq.ClientID)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error})
 			return
 		}
 
-		//Insert into db
+		//Inserting into db
 		err = insertUser(db, signUpReq, access_token_str, refresh_token_str)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error":err.Error})
 			return
 		}
 
-		//Return token to user
+		//Returning token to user
 		signUpRes := models.SignUpRes{
 			AccessToken : access_token_str,
 			RefreshToken : refresh_token_str,
@@ -73,7 +73,7 @@ func SignUp(db *sql.DB) gin.HandlerFunc{
 }
 
 func generateTokens(ClientID string) (string, string, error) {
-	// Create access token
+	// Creating access token
 	access_claims := jwt.MapClaims{
 		"client_id": ClientID,
 		"exp":       time.Now().Add(time.Hour * 24 * 7).Unix(),
@@ -84,7 +84,7 @@ func generateTokens(ClientID string) (string, string, error) {
 		return "", "", err
 	}
 
-	// Create refresh token
+	// Creating refresh token
 	refresh_claims := jwt.MapClaims{
 		"client_id": ClientID,
 		"exp":       time.Now().Add(time.Hour * 24 * 30).Unix(),
@@ -108,7 +108,7 @@ func insertUser(db *sql.DB, signUpReq models.SignUpReq, accessToken string, refr
 	return nil
 }
 
-func isUserUnique(db *sql.DB, email string, ClientID string) (bool, error) {
+func IsUserUnique(db *sql.DB, email string, ClientID string) (bool, error) {
     var count int
     err := db.QueryRow("SELECT COUNT(*) FROM users WHERE email = $1 OR client_id = $2", email, ClientID).Scan(&count)
     if err != nil {
