@@ -26,7 +26,7 @@ const (
 )
 
 func main() {
-	docs.SwaggerInfo.Host = "localhost:8080"
+	docs.SwaggerInfo.Host = "172.25.0.32:8080"
 	docs.SwaggerInfo.BasePath = ""
 	docs.SwaggerInfo.Schemes = []string{"http"}
 	//Connecting to db
