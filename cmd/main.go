@@ -1,40 +1,40 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/sethvargo/go-envconfig"
 
-	"jwt-go/internal/rest"
-	"jwt-go/internal/cors"
 	"jwt-go/api/docs"
+	"jwt-go/internal/config"
+	"jwt-go/internal/cors"
+	"jwt-go/internal/rest"
+
 	// "jwt-go/internal/models"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-
-)
-
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "dbsql"
-	password = "gosql"
-	dbname   = "jwt_go"
 )
 
 func main() {
-	docs.SwaggerInfo.Host = "172.25.0.32:8080"
+
+	_ = godotenv.Load()
+	var cfg config.Config
+	if err := envconfig.ProcessWith(context.TODO(), &cfg, envconfig.OsLookuper()); 
+	err != nil {
+		panic(err)
+	}
+
+	docs.SwaggerInfo.Host = cfg.ServerIP + cfg.HTTPPort
 	docs.SwaggerInfo.BasePath = ""
 	docs.SwaggerInfo.Schemes = []string{"http"}
 	//Connecting to db
-	psql := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
-
-	db, err := sql.Open("postgres", psql)
+	db, err := sql.Open("postgres", cfg.PostgresURI())
 	if err != nil {
 		panic(err)
 	}
