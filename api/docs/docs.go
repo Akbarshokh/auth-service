@@ -82,7 +82,7 @@ const docTemplate = `{
                 "summary": "Checking token with Refresh Token",
                 "parameters": [
                     {
-                        "description": "Access Token",
+                        "description": "Refresh Token",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -324,10 +324,10 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {},
-                "errorCode": {
+                "error_code": {
                     "type": "integer"
                 },
-                "errorNote": {
+                "error_note": {
                     "type": "string"
                 },
                 "status": {

@@ -1,8 +1,8 @@
 package rest
 
 import (
+	"auth_service/internal/models"
 	"database/sql"
-	"jwt-go/internal/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

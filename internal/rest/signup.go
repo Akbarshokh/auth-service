@@ -1,22 +1,21 @@
 package rest
 
 import (
+	"auth_service/internal/models"
 	"database/sql"
-	"jwt-go/internal/models"
 	"net/http"
 	"time"
-	
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
 
-type Response struct {
-	Status    string
-	ErrorCode int
-	ErrorNote string
-	Data      interface{}
-}
-
+// type Response struct {
+// 	Status    string      `json:"status"`
+// 	ErrorCode int         `json:"error_code"`
+// 	ErrorNote string      `json:"error_note"`
+// 	Data      interface{} `json:"data"`
+// }
 
 // SignUp godoc
 // @Router /sign-up [POST]
@@ -28,26 +27,26 @@ type Response struct {
 // @Success 201 {object} Response{data=models.SignUpRes}
 // @Failure 400 {object} Response{data}
 // @Failure 500 {object} Response{data}
-func SignUp(db *sql.DB) gin.HandlerFunc{
+func SignUp(db *sql.DB) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		//Parsing request body
 		var signUpReq models.SignUpReq
-		if err := ctx.ShouldBindJSON(&signUpReq); err != nil{
+		if err := ctx.ShouldBindJSON(&signUpReq); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 		//Verifying user
 		isUnique, err := IsUserUnique(db, signUpReq.Email, signUpReq.ClientID)
-        if err != nil {
-            ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-            return
-        }
-        if !isUnique {
-            ctx.JSON(http.StatusConflict, gin.H{"error": "User with the same email or client_id already exists"})
-            return
-        }
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if !isUnique {
+			ctx.JSON(http.StatusConflict, gin.H{"error": "User with the same email or client_id already exists"})
+			return
+		}
 
-		//Generating 	access and refresh token
+		//Generating access and refresh token
 		access_token_str, refresh_token_str, err := generateTokens(signUpReq.ClientID)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error})
@@ -57,16 +56,16 @@ func SignUp(db *sql.DB) gin.HandlerFunc{
 		//Inserting into db
 		err = insertUser(db, signUpReq, access_token_str, refresh_token_str)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error":err.Error})
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error})
 			return
 		}
 
 		//Returning token to user
 		signUpRes := models.SignUpRes{
-			AccessToken : access_token_str,
-			RefreshToken : refresh_token_str,
-			Active : true,
-			ClientID: signUpReq.ClientID,
+			AccessToken:  access_token_str,
+			RefreshToken: refresh_token_str,
+			Active:       true,
+			ClientID:     signUpReq.ClientID,
 		}
 		ctx.JSON(http.StatusOK, signUpRes)
 	}
@@ -109,10 +108,10 @@ func insertUser(db *sql.DB, signUpReq models.SignUpReq, accessToken string, refr
 }
 
 func IsUserUnique(db *sql.DB, email string, ClientID string) (bool, error) {
-    var count int
-    err := db.QueryRow("SELECT COUNT(*) FROM users WHERE email = $1 OR client_id = $2", email, ClientID).Scan(&count)
-    if err != nil {
-        return false, err
-    }
-    return count == 0, nil
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM users WHERE email = $1 OR client_id = $2", email, ClientID).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	return count == 0, nil
 }

@@ -1,15 +1,16 @@
 package rest
 
 import (
+	"auth_service/internal/models"
 	"database/sql"
 	"fmt"
-	"jwt-go/internal/models"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
+
 // SignIn godoc
 // @Router /sign-in [POST]
 // @Summary Sign In using client_id, email, and access_token
@@ -20,11 +21,10 @@ import (
 // @Success 201 {object} Response{data}
 // @Failure 400 {object} Response{data}
 // @Failure 500 {object} Response{data}
-func SignIn(db *sql.DB) gin.HandlerFunc{
+func SignIn(db *sql.DB) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var signInReq models.SignInReq
-		if err := ctx.ShouldBindJSON(&signInReq);
-		err != nil{
+		if err := ctx.ShouldBindJSON(&signInReq); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
@@ -35,10 +35,10 @@ func SignIn(db *sql.DB) gin.HandlerFunc{
 			return
 		}
 		if isUnique {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error":"Invalid credential"})
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credential"})
 			return
 		}
-		if !verifyAccessToken(signInReq.AccessToken){
+		if !verifyAccessToken(signInReq.AccessToken) {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Access Token"})
 			return
 		}
@@ -62,20 +62,20 @@ func SignIn(db *sql.DB) gin.HandlerFunc{
 }
 
 func verifyAccessToken(token string) bool {
-    // Parse the token with a secret key.
-    parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-        if token.Method != jwt.SigningMethodHS256 {
-            return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-        }
-        return []byte("secret"), nil
-    })
+	// Parse the token with a secret key.
+	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		if token.Method != jwt.SigningMethodHS256 {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte("secret"), nil
+	})
 
-    // Checking if the token is valid and has not expired.
-    if err == nil && parsedToken.Valid {
-        return true
-    }
+	// Checking if the token is valid and has not expired.
+	if err == nil && parsedToken.Valid {
+		return true
+	}
 
-    return false
+	return false
 }
 
 func generateAccessToken(ClientID string) (string, error) {

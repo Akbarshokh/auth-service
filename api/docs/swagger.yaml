@@ -63,9 +63,9 @@ definitions:
   rest.Response:
     properties:
       data: {}
-      errorCode:
+      error_code:
         type: integer
-      errorNote:
+      error_note:
         type: string
       status:
         type: string
@@ -111,7 +111,7 @@ paths:
       description: This endpoint verifies token is active or not and generates new
         access token
       parameters:
-      - description: Access Token
+      - description: Refresh Token
         in: body
         name: request
         required: true

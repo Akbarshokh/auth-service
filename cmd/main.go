@@ -11,12 +11,12 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/sethvargo/go-envconfig"
 
-	"jwt-go/api/docs"
-	"jwt-go/internal/config"
-	"jwt-go/internal/cors"
-	"jwt-go/internal/rest"
+	"auth_service/api/docs"
+	"auth_service/internal/config"
+	"auth_service/internal/cors"
+	"auth_service/internal/rest"
 
-	// "jwt-go/internal/models"
+	// "auth_service/internal/models"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -25,8 +25,7 @@ func main() {
 
 	_ = godotenv.Load()
 	var cfg config.Config
-	if err := envconfig.ProcessWith(context.TODO(), &cfg, envconfig.OsLookuper()); 
-	err != nil {
+	if err := envconfig.ProcessWith(context.TODO(), &cfg, envconfig.OsLookuper()); err != nil {
 		panic(err)
 	}
 

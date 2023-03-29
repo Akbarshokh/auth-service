@@ -1,4 +1,4 @@
-module jwt-go
+module auth_service
 
 go 1.20
 
