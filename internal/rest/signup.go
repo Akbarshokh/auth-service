@@ -2,6 +2,7 @@ package rest
 
 import (
 	"auth_service/internal/models"
+	"auth_service/internal/errs"
 	"database/sql"
 	"net/http"
 	"time"
@@ -32,31 +33,31 @@ func SignUp(db *sql.DB) gin.HandlerFunc {
 		//Parsing request body
 		var signUpReq models.SignUpReq
 		if err := ctx.ShouldBindJSON(&signUpReq); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			Return(ctx, nil, errs.Errf(errs.ErrValidation, err.Error()))
 			return
 		}
 		//Verifying user
 		isUnique, err := IsUserUnique(db, signUpReq.Email, signUpReq.ClientID)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Return(ctx, nil, errs.Errf(errs.ErrInternal, err.Error()))
 			return
 		}
 		if !isUnique {
-			ctx.JSON(http.StatusConflict, gin.H{"error": "User with the same email or client_id already exists"})
+			Return(ctx, nil, errs.New("User with the same email or client_id already exists"))
 			return
 		}
 
 		//Generating access and refresh token
 		access_token_str, refresh_token_str, err := generateTokens(signUpReq.ClientID)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error})
+			Return(ctx, nil, errs.Errf(errs.ErrInternal, err.Error()))
 			return
 		}
 
 		//Inserting into db
 		err = insertUser(db, signUpReq, access_token_str, refresh_token_str)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error})
+			Return(ctx, nil, errs.Errf(errs.ErrInternal, err.Error()))
 			return
 		}
 
@@ -75,7 +76,7 @@ func generateTokens(ClientID string) (string, string, error) {
 	// Creating access token
 	access_claims := jwt.MapClaims{
 		"client_id": ClientID,
-		"exp":       time.Now().Add(time.Hour * 24 * 7).Unix(),
+		"exp":       time.Now().Add(time.Hour * 24 * 7).Unix(), //expiration seven days
 	}
 	access_token := jwt.NewWithClaims(jwt.SigningMethodHS256, access_claims)
 	access_token_str, err := access_token.SignedString([]byte("secret"))
@@ -86,7 +87,7 @@ func generateTokens(ClientID string) (string, string, error) {
 	// Creating refresh token
 	refresh_claims := jwt.MapClaims{
 		"client_id": ClientID,
-		"exp":       time.Now().Add(time.Hour * 24 * 30).Unix(),
+		"exp":       time.Now().Add(time.Hour * 24 * 30).Unix(), //expiration one month
 	}
 	refresh_token := jwt.NewWithClaims(jwt.SigningMethodHS256, refresh_claims)
 	refresh_token_str, err := refresh_token.SignedString([]byte("secret"))

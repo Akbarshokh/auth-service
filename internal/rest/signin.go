@@ -2,6 +2,7 @@ package rest
 
 import (
 	"auth_service/internal/models"
+	"auth_service/internal/errs"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -25,33 +26,33 @@ func SignIn(db *sql.DB) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var signInReq models.SignInReq
 		if err := ctx.ShouldBindJSON(&signInReq); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			Return(ctx, nil, errs.Errf(errs.ErrValidation, err.Error()))
 			return
 		}
 		//Verifying is user exist in DB
 		isUnique, err := IsUserUnique(db, signInReq.Email, signInReq.ClientID)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Return(ctx, nil, errs.Errf(errs.ErrValidation, err.Error()))
 			return
 		}
 		if isUnique {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credential"})
+			Return(ctx, nil, errs.Errf(errs.ErrAuthorization, err.Error()))
 			return
 		}
 		if !verifyAccessToken(signInReq.AccessToken) {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Access Token"})
+			Return(ctx, nil, errs.New("Invalid Access Token"))
 			return
 		}
 		//Generating new Access Token
 		newAccessToken, err := generateAccessToken(signInReq.ClientID)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Return(ctx, nil, errs.Errf(errs.ErrValidation, err.Error()))
 			return
 		}
 		//Updating new access token in db
 		err = updateAccessToken(db, signInReq.ClientID, newAccessToken)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			Return(ctx, nil, errs.Errf(errs.ErrValidation, err.Error()))
 			return
 		}
 		// Returning new access token
@@ -69,7 +70,6 @@ func verifyAccessToken(token string) bool {
 		}
 		return []byte("secret"), nil
 	})
-
 	// Checking if the token is valid and has not expired.
 	if err == nil && parsedToken.Valid {
 		return true

@@ -1,10 +1,10 @@
 package rest
 
 import (
-	"database/sql"
+	"auth_service/internal/errs"
 	"auth_service/internal/models"
+	"database/sql"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -25,62 +25,65 @@ func GetToken(db *sql.DB) gin.HandlerFunc {
 		var token models.GetTokenReq
 		//Parsing request body
 		if err := ctx.ShouldBindJSON(&token); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			Return(ctx, nil, errs.Errf(errs.ErrValidation, err.Error()))
 			return
 		}
 
 		//Verifying Refresh Token
-		_, err := jwt.Parse(token.RefreshToken, func(t *jwt.Token) (interface{}, error) {
+		if err := verifyRefreshtoken(token.RefreshToken); err != nil {
+			Return(ctx, nil, errs.New("Invalid Refresh Token"))
+			return
+		}
+		//Parsing Client_id from refresh token
+		refresh_token, _ := jwt.Parse(token.RefreshToken, func(token *jwt.Token) (interface{}, error) {
 			return []byte("secret"), nil
 		})
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid refresh token"})
-			return
-		}
-		var response models.GetTokenRes
-		//Generating new Access Token
-		access_token_expiration := time.Now().Add(time.Hour * 24 * 7)
+		claims, _ := refresh_token.Claims.(jwt.MapClaims)
+		ClientID := claims["client_id"].(string)
 
-		access_claims := jwt.MapClaims{
-			"client_id": response.ClientID,
-			"exp":       access_token_expiration.Unix(),
-		}
-		access_token := jwt.NewWithClaims(jwt.SigningMethodHS256, access_claims)
-		access_token_str, err := access_token.SignedString([]byte("secret"))
+		//Generating new Access and Refresh token
+		access_token_str, refresh_token_str, err := generateTokens(ClientID)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "invalid refresh token"})
-			return
-		}
-
-		// Creating refresh token
-		refresh_claims := jwt.MapClaims{
-			"client_id": response.ClientID,
-			"exp":       time.Now().Add(time.Hour * 24 * 30).Unix(),
-		}
-		refresh_token := jwt.NewWithClaims(jwt.SigningMethodHS256, refresh_claims)
-		refresh_token_str, err := refresh_token.SignedString([]byte("secret"))
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "invalid refresh token"})
+			Return(ctx, nil, errs.New("Invalid Refresh Token"))
 			return
 		}
 
 		//Updating tokens in db
-		query := "UPDATE users SET access_token=$1 WHERE refresh_token=$2"
-		_, err = db.Exec(query, access_token_str, refresh_token_str)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "invalid refresh token"})
+		if err := updateTokensInDB(db, ClientID, access_token_str, refresh_token_str); err != nil {
+			Return(ctx, nil, errs.Errf(errs.ErrInternal, err.Error()))
 			return
 		}
-		
-		result := models.GetTokenRes{
-			SignUpRes: models.SignUpRes{
-				ClientID:     "client_id",
-				AccessToken:  access_token_str,
-				RefreshToken: refresh_token_str,
-				Active:       true,
-			},
-		}
+
 		// Returning Tokens
+		result := ReturnResult(ClientID, access_token_str, refresh_token_str)
 		ctx.JSON(http.StatusOK, result)
 	}
+}
+
+func verifyRefreshtoken(refresh_token string) error {
+	_, err := jwt.Parse(refresh_token, func(t *jwt.Token) (interface{}, error) {
+		return []byte("secret"), nil
+	})
+	return err
+}
+
+func updateTokensInDB(db *sql.DB, ClientID string, access_token_str string, refresh_token_str string) error {
+	query := "UPDATE users SET access_token=$1, refresh_token=$2 WHERE client_id=$3"
+	_, err := db.Exec(query, access_token_str, refresh_token_str, ClientID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func ReturnResult(ClientID string, access_token_str string, refresh_token_str string) models.GetTokenRes{
+	result := models.GetTokenRes{
+		SignUpRes: models.SignUpRes{
+			ClientID:     ClientID,
+			AccessToken:  access_token_str,
+			RefreshToken: refresh_token_str,
+			Active:       true,
+		},
+	}
+	return result
 }

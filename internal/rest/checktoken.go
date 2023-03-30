@@ -2,6 +2,7 @@ package rest
 
 import (
 	"auth_service/internal/models"
+	"auth_service/internal/errs"
 	"database/sql"
 	"net/http"
 
@@ -24,7 +25,7 @@ func CheckToken(db *sql.DB) gin.HandlerFunc {
 		var token models.CheckTokenReq
 		//Parsing request body
 		if err := ctx.ShouldBindJSON(&token); err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			Return(ctx, nil, errs.Errf(errs.ErrValidation, err.Error()))
 			return
 		}
 		//Verifying Acces Token

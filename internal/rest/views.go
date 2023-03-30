@@ -16,10 +16,10 @@ type Response struct {
 }
 
 //nolint:exhaustruct
-func Return(c *gin.Context, data interface{}, err error) {
+func Return(ctx *gin.Context, data interface{}, err error) {
 	switch {
 	case err == nil:
-		c.JSON(http.StatusOK, Response{
+		ctx.JSON(http.StatusOK, Response{
 			Status:    StatusMsgSuccess,
 			ErrorCode: ErrCodeNoError,
 			ErrorNote: "",
@@ -27,21 +27,21 @@ func Return(c *gin.Context, data interface{}, err error) {
 		})
 
 	case errors.Is(err, errs.ErrValidation):
-		c.JSON(http.StatusUnprocessableEntity, Response{
+		ctx.JSON(http.StatusUnprocessableEntity, Response{
 			Status:    StatusMsgFailure,
 			ErrorCode: ErrCodeValidation,
 			ErrorNote: err.Error(),
 		})
 
 	case errors.Is(err, errs.ErrNotFound):
-		c.JSON(http.StatusNotFound, Response{
+		ctx.JSON(http.StatusNotFound, Response{
 			Status:    StatusMsgFailure,
 			ErrorCode: ErrCodeDocumentNotFound,
 			ErrorNote: err.Error(),
 		})
 
 	default:
-		c.JSON(http.StatusInternalServerError, Response{
+		ctx.JSON(http.StatusInternalServerError, Response{
 			Status:    StatusMsgFailure,
 			ErrorCode: ErrCodeInternalErr,
 			ErrorNote: err.Error(),
