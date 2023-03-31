@@ -1,11 +1,12 @@
 package rest
 
 import (
-	"auth_service/internal/models"
 	"auth_service/internal/errs"
+	"auth_service/internal/models"
 	"database/sql"
 	"net/http"
 	"time"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -115,4 +116,8 @@ func IsUserUnique(db *sql.DB, email string, ClientID string) (bool, error) {
 		return false, err
 	}
 	return count == 0, nil
+}
+
+func IsValdEmail(email string) bool {
+	return strings.Contains(email, "@hamkorbank.uz")
 }

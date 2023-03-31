@@ -1,7 +1,7 @@
 package models
 
 type CheckTokenReq struct {
-	AccessToken string `json:"access_token"`
+	AccessToken string `json:"access_token" example:"valid token" `
 }
 
 type CheckTokenRes struct {
@@ -9,7 +9,7 @@ type CheckTokenRes struct {
 }
 
 type GetTokenReq struct {
-	RefreshToken string `json:"refresh_token"`
+	RefreshToken string `json:"refresh_token" example:"valid token"`
 }
 
 type GetTokenRes struct {

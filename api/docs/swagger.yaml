@@ -2,6 +2,7 @@ definitions:
   models.CheckTokenReq:
     properties:
       access_token:
+        example: valid token
         type: string
     type: object
   models.CheckTokenRes:
@@ -12,6 +13,7 @@ definitions:
   models.GetTokenReq:
     properties:
       refresh_token:
+        example: valid token
         type: string
     type: object
   models.GetTokenRes:
@@ -28,25 +30,34 @@ definitions:
   models.SignInReq:
     properties:
       access_token:
+        example: valid token
         type: string
       client_id:
+        example: "12345"
         type: string
       email:
+        example: '@hamkorbank.uz'
         type: string
     type: object
   models.SignUpReq:
     properties:
       client_id:
+        example: "12345"
         type: string
       device_num:
+        example: 172.25.102.25 / 423265
         type: string
       device_type:
+        example: web / mobile
         type: string
       email:
+        example: '@hamkorbank.uz'
         type: string
       first_name:
+        example: Ism
         type: string
       last_name:
+        example: Familiya
         type: string
     type: object
   models.SignUpRes:
@@ -109,7 +120,7 @@ paths:
   /get-token:
     post:
       description: This endpoint verifies token is active or not and generates new
-        access token
+        access and refresh tokens
       parameters:
       - description: Refresh Token
         in: body

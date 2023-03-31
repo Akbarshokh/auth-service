@@ -13,7 +13,7 @@ import (
 // GetToken godoc
 // @Router /get-token [POST]
 // @Summary Checking token with Refresh Token
-// @Description This endpoint verifies token is active or not and generates new access token
+// @Description This endpoint verifies token is active or not and generates new access and refresh tokens
 // @Tags User Auth Service
 // @Produce json
 // @Param request body models.GetTokenReq true "Refresh Token"

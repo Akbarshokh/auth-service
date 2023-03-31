@@ -72,7 +72,7 @@ const docTemplate = `{
         },
         "/get-token": {
             "post": {
-                "description": "This endpoint verifies token is active or not and generates new access token",
+                "description": "This endpoint verifies token is active or not and generates new access and refresh tokens",
                 "produces": [
                     "application/json"
                 ],
@@ -229,7 +229,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "access_token": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "valid token"
                 }
             }
         },
@@ -245,7 +246,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "refresh_token": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "valid token"
                 }
             }
         },
@@ -270,13 +272,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "access_token": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "valid token"
                 },
                 "client_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "12345"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "@hamkorbank.uz"
                 }
             }
         },
@@ -284,22 +289,28 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "client_id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "12345"
                 },
                 "device_num": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "172.25.102.25 / 423265"
                 },
                 "device_type": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "web / mobile"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "@hamkorbank.uz"
                 },
                 "first_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Ism"
                 },
                 "last_name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Familiya"
                 }
             }
         },
