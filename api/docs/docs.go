@@ -282,6 +282,9 @@ const docTemplate = `{
                 "email": {
                     "type": "string",
                     "example": "@hamkorbank.uz"
+                },
+                "password": {
+                    "type": "string"
                 }
             }
         },

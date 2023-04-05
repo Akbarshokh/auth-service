@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // SignIn godoc
@@ -39,6 +40,19 @@ func SignIn(db *sql.DB) gin.HandlerFunc {
 			Return(ctx, nil, errs.Errf(errs.ErrAuthorization, err.Error()))
 			return
 		}
+
+		//verifying password
+		hashedPassword, err := verifyPassword(db, signInReq.Email, signInReq.ClientID)
+		if err != nil {
+			Return(ctx, nil, errs.Errf(errs.ErrValidation, err.Error()))
+			return
+		}
+		if err := bcrypt.CompareHashAndPassword(hashedPassword, []byte(signInReq.Password)); err != nil {
+			Return(ctx, nil, errs.New("Invalid email or password"))
+			return
+		}	
+		
+		//Veryfying access token
 		if !verifyAccessToken(signInReq.AccessToken) {
 			Return(ctx, nil, errs.New("Invalid Access Token"))
 			return
@@ -60,6 +74,16 @@ func SignIn(db *sql.DB) gin.HandlerFunc {
 			"access_token": newAccessToken,
 		})
 	}
+}
+
+func verifyPassword(db *sql.DB, email string, ClientID string) ([]byte, error) {
+	var hashedPassword []byte
+	err := db.QueryRow("SELECT password FROM users WHERE email = $1 AND client_id = $2", email, ClientID).Scan(&hashedPassword)
+	if err != nil {
+		return nil, err
+	}
+	return hashedPassword, nil
+
 }
 
 func verifyAccessToken(token string) bool {
@@ -94,8 +118,3 @@ func updateAccessToken(db *sql.DB, email string, accessToken string) error {
 	_, err := db.Exec(query, accessToken, email)
 	return err
 }
-
-// if err := bcrypt.CompareHashAndPassword(hashedPassword, []byte(signUpReq.Password)); err != nil {
-		// 	Return(ctx, nil, errs.New("Invalid email or password"))
-		// 	return
-		// }

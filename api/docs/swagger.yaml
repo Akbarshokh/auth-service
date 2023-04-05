@@ -38,6 +38,8 @@ definitions:
       email:
         example: '@hamkorbank.uz'
         type: string
+      password:
+        type: string
     type: object
   models.SignUpReq:
     properties:
