@@ -311,6 +311,10 @@ const docTemplate = `{
                 "last_name": {
                     "type": "string",
                     "example": "Familiya"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "Password@"
                 }
             }
         },

@@ -94,3 +94,8 @@ func updateAccessToken(db *sql.DB, email string, accessToken string) error {
 	_, err := db.Exec(query, accessToken, email)
 	return err
 }
+
+// if err := bcrypt.CompareHashAndPassword(hashedPassword, []byte(signUpReq.Password)); err != nil {
+		// 	Return(ctx, nil, errs.New("Invalid email or password"))
+		// 	return
+		// }

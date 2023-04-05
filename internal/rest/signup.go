@@ -5,11 +5,13 @@ import (
 	"auth_service/internal/models"
 	"database/sql"
 	"net/http"
-	"time"
 	"strings"
+	"time"
+	"unicode"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // type Response struct {
@@ -37,14 +39,16 @@ func SignUp(db *sql.DB) gin.HandlerFunc {
 			Return(ctx, nil, errs.Errf(errs.ErrValidation, err.Error()))
 			return
 		}
-		//Verifying user
-		isUnique, err := IsUserUnique(db, signUpReq.Email, signUpReq.ClientID)
-		if err != nil {
-			Return(ctx, nil, errs.Errf(errs.ErrInternal, err.Error()))
+		//validating user input
+		if err := validateUserInput(signUpReq, db); err != nil{
+			Return(ctx, nil, errs.Errf(errs.ErrValidation, err.Error()))
 			return
 		}
-		if !isUnique {
-			Return(ctx, nil, errs.New("User with the same email or client_id already exists"))
+
+		//generating hash password
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(signUpReq.Password), bcrypt.DefaultCost)
+		if err != nil {
+			Return(ctx, nil, errs.Errf(errs.ErrInternal, err.Error()))
 			return
 		}
 
@@ -56,7 +60,7 @@ func SignUp(db *sql.DB) gin.HandlerFunc {
 		}
 
 		//Inserting into db
-		err = insertUser(db, signUpReq, access_token_str, refresh_token_str)
+		err = insertUser(db, signUpReq, string(hashedPassword), access_token_str, refresh_token_str)
 		if err != nil {
 			Return(ctx, nil, errs.Errf(errs.ErrInternal, err.Error()))
 			return
@@ -71,6 +75,53 @@ func SignUp(db *sql.DB) gin.HandlerFunc {
 		}
 		ctx.JSON(http.StatusOK, signUpRes)
 	}
+}
+
+func validateUserInput(signUpReq models.SignUpReq, db *sql.DB) error{
+	//Checking for empty fields
+	if signUpReq.ClientID == "" || signUpReq.FirstName == "" ||
+		signUpReq.LastName == "" || signUpReq.Email == "" || signUpReq.DeviceNum == "" || 
+		signUpReq.Password == "" ||signUpReq.DeviceType == "" {
+			return errs.New("Every field should not be empty")
+	}
+	//Checking for valid email address
+	if !IsValidEmail(signUpReq.Email) {
+		return errs.New("Invalid email")
+	}
+	//checking for unique email and client_id
+	isUnique, err := IsUserUnique(db, signUpReq.Email, signUpReq.ClientID)
+	if err != nil {
+		return errs.Errf(errs.ErrInternal, err.Error())
+	}
+	if !isUnique {
+		return errs.New("User with the same email or client_id already exists")
+	}
+	//checking for valid first_name and last_name (at least 2 chars)
+	if len(signUpReq.FirstName) < 2 || len(signUpReq.LastName) < 2 {
+		return errs.New("First Name and Last Name should be at least 2 charachters")
+	}
+	//checking password length (at least 8 characters, at least one uppercase letter, one lowercase letter, one digit, and one special character)
+	if len(signUpReq.Password) < 8 {
+		return errs.New("Password length should be at least 8 characters")
+	}
+	var hasUpper, hasLower, hasDigit, hasSpecial bool
+
+	for _, char := range signUpReq.Password {
+		switch {
+		case unicode.IsUpper(char):
+			hasUpper =true
+		case unicode.IsLower(char):
+			hasLower =true
+		case unicode.IsDigit(char):
+			hasDigit =true
+		case unicode.IsPunct(char) || unicode.IsSymbol(char):
+			hasSpecial = true
+		}
+	}
+	if !hasUpper || !hasLower || !hasDigit || !hasSpecial {
+		return errs.New("Password should contain at least one uppercase letter, one lowercase letter, one digit, and one special character")
+	}
+	return nil
 }
 
 func generateTokens(ClientID string) (string, string, error) {
@@ -99,9 +150,10 @@ func generateTokens(ClientID string) (string, string, error) {
 	return access_token_str, refresh_token_str, nil
 }
 
-func insertUser(db *sql.DB, signUpReq models.SignUpReq, accessToken string, refreshToken string) error {
-	query := "INSERT INTO users (client_id, first_name, last_name, email, device_num, device_type, access_token, refresh_token, active) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
-	_, err := db.Exec(query, signUpReq.ClientID, signUpReq.FirstName, signUpReq.LastName, signUpReq.Email, signUpReq.DeviceNum, signUpReq.DeviceType, accessToken, refreshToken, true)
+func insertUser(db *sql.DB, signUpReq models.SignUpReq, hashedPassword, accessToken string, refreshToken string) error {
+	//Insert New User data into DB
+	query := "INSERT INTO users (client_id, first_name, last_name, email, password, device_num, device_type, access_token, refresh_token, active) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+	_, err := db.Exec(query, signUpReq.ClientID, signUpReq.FirstName, signUpReq.LastName, signUpReq.Email, hashedPassword, signUpReq.DeviceNum, signUpReq.DeviceType, accessToken, refreshToken, true)
 	if err != nil {
 		return err
 	}
@@ -110,6 +162,7 @@ func insertUser(db *sql.DB, signUpReq models.SignUpReq, accessToken string, refr
 }
 
 func IsUserUnique(db *sql.DB, email string, ClientID string) (bool, error) {
+	//checking for unique email and client_id
 	var count int
 	err := db.QueryRow("SELECT COUNT(*) FROM users WHERE email = $1 OR client_id = $2", email, ClientID).Scan(&count)
 	if err != nil {
@@ -118,6 +171,11 @@ func IsUserUnique(db *sql.DB, email string, ClientID string) (bool, error) {
 	return count == 0, nil
 }
 
-func IsValdEmail(email string) bool {
+func IsValidEmail(email string) bool {
+	//Checking for valid email address
+	if strings.Count(email, "@") != 1 {
+		return false
+	}
 	return strings.Contains(email, "@hamkorbank.uz")
 }
+

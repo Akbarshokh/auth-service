@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS users(
     "first_name" varchar(255) NOT NULL,
     "last_name" varchar(255) NOT NULL,
     "email" varchar(50) NOT NULL,
+    "password" varchar(50) NOT NULL,
     "device_num" varchar(100) NOT NULL,
     "device_type" varchar(100) NOT NULL,
     "active" boolean,

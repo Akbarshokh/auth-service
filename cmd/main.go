@@ -56,7 +56,7 @@ func main() {
 	router.POST("/check-token", rest.CheckToken(db))
 	router.POST("/get-token", rest.GetToken(db))
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	if err := router.Run("172.25.0.32:8080"); err != nil {
+	if err := router.Run("172.25.0.32:8000"); err != nil {
 		log.Fatal(err)
 	}
 }

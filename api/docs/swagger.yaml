@@ -59,6 +59,9 @@ definitions:
       last_name:
         example: Familiya
         type: string
+      password:
+        example: Password@
+        type: string
     type: object
   models.SignUpRes:
     properties:
